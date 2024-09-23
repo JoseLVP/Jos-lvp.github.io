@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+
+.todo{
+    align-self: center;
+
+}
+
+.borde {
+  width: 300px;
+  height: 5x;
+  border-color: white;
+  border-width: 2px;
+  border-style: solid;
+  background-color: blue;
+  font-size: 1rem;
+  color: white;
+  padding-right: 10px;
+  
+}
+
+.menu {
+  width: 300px;
+  height: 5x;
+  border-color: white;
+  border-width: 2px;
+  border-style: solid;
+  background-color: rgb(199, 197, 197);
+  font-size: 20px;
+  color: black;
+  padding-right: 10px;
+  padding-left: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+}
+
+.botones{
+  border-color: black;
+  border-width: 2px;
+  border-style: dashed;
+  background-color: rgb(226, 223, 223);
+
+}
+
+.botones:hover{
+
+    border-color: black;
+    background-color: yellow;
+    font-size: 15px;
+
+}
+
+</style>
+
+
+
+<body class="todo" style="background-color: lightpink;">
+    <main>
+
+        <div class="borde" style="padding-left: 10px;">
+            D'OH! 
+        </div>
+
+        <div class="menu">
+
+            <table style="width: 100%;">
+                <tbody>
+                    <td>
+                        <th>
+                            <img src="./img/WhatsApp_Image_2024-06-18_at_23.05.27-removebg-preview.png" alt="" style="width: 100px;">
+                        </th>
+                        <th style="text-align: left;"> 
+                            Oye, veamos <br>
+                            Los simpson?
+                        </th>
+                    </td>
+                </tbody>
+            </table>
+            
+            <button class="botones" onclick="random()" >Excelente</button>
+            <button class="botones" onclick="random()" >Perfectirijillo</button>
+            <br>
+
+            <div id="texto" style="font-size: 1em; ">
+                
+            </div>
+        </div>
+
+    </main>
+
+
+    <script>
+
+        let temporada;
+        let capitulo;
+
+        let texto = document.getElementById("texto");
+
+        function random(){
+
+           temporada = Math.floor((Math.random() * (14 - 1 + 1)) + 1);
+
+           capitulo = Math.floor((Math.random() * (25 - 1 + 1)) + 1);
+           
+            texto.innerHTML = `<br> <a href=https://playdede.us/episodios/los_simpson_456-${temporada}x${capitulo}/ target=__blank>Enlace</a>`;
+ 
+
+        }
+
+
+    </script>
+    
+</body>
+</html>
