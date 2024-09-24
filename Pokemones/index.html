@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <link rel="shortcut icon" href="1.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff5c5c;
+            font-size: 3em;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #nombrePokemon {
+            width: 300px;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #ff5c5c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background-color: #e04848;
+            transform: scale(1.05);
+        }
+
+        #contador {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #ff5c5c;
+            float: right;
+            margin-right: 20px;
+            background-color: #ffe5e5;
+            padding: 5px 15px;
+            border-radius: 25px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #PokedexContainer {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pokemon {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 200px;
+            text-align: center;
+            margin: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .pokemon img {
+            width: 120px;
+            height: auto;
+        }
+
+        .pokemon h2 {
+            color: #333;
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        .pokemon p {
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        .pokemon:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Pokédex</h1>
+    <div style="text-align: center;">
+        <input id="nombrePokemon" placeholder="Busca tu pokémon" type="text">
+        <button id="boton">Buscar</button>
+        <button id="borrarTodo">Borrar todo</button>
+        <span id="contador">0</span>
+    </div>
+
+    <div id="PokedexContainer"></div>
+
+    <script>
+        let nombrePokemon = document.getElementById("nombrePokemon");
+        let boton = document.getElementById("boton");
+        let borrarTodoBtn = document.getElementById("borrarTodo");
+        let pokedexContainer = document.getElementById("PokedexContainer");
+        let contador = localStorage.getItem("contador") ? parseInt(localStorage.getItem("contador")) : 0;
+
+        boton.addEventListener("click", buscarPokemon);
+        borrarTodoBtn.addEventListener("click", borrarTodo);
+        nombrePokemon.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                buscarPokemon();
+            }
+        });
+
+        window.onload = function() {
+            let pokemonesGuardados = JSON.parse(localStorage.getItem("pokemones")) || [];
+            pokemonesGuardados.sort((a, b) => a.id - b.id);
+            pokemonesGuardados.forEach(pokemon => {
+                tratarPokemon(pokemon);
+            });
+            actualizarContador();
+        };
+
+        function buscarPokemon() {
+            fetch(`https://pokeapi.co/api/v2/pokemon/${nombrePokemon.value.toLowerCase()}`)
+            .then(response => response.json())
+            .then(clavarPokemon => {
+                guardarPokemon(clavarPokemon);
+                nombrePokemon.value = "";
+                contador++;
+                actualizarContador();
+                mostrarPokemonesOrdenados();
+            })
+            .catch(error => console.log(error));
+        }
+
+        function tratarPokemon(clavarPokemon) {
+            let pokemonDiv = document.createElement("div");
+            pokemonDiv.className = "pokemon";
+            pokemonDiv.innerHTML = `
+                <h2>${capitalizarPrimeraLetra(clavarPokemon.name)} - Nº ${clavarPokemon.id}</h2>
+                <img src="${clavarPokemon.sprites.front_default}" alt="${clavarPokemon.name}">
+                <p>Altura: ${clavarPokemon.height / 10} m</p>
+                <p>Peso: ${clavarPokemon.weight / 10} kg</p>
+                <p>Tipo: ${clavarPokemon.types.map(type => type.type.name).join(', ')}</p>
+            `;
+            pokedexContainer.appendChild(pokemonDiv);
+        }
+
+        function capitalizarPrimeraLetra(nombre) {
+            return nombre.charAt(0).toUpperCase() + nombre.slice(1);
+        }
+
+        function guardarPokemon(clavarPokemon) {
+            let pokemonesGuardados = JSON.parse(localStorage.getItem("pokemones")) || [];
+            if (!pokemonesGuardados.some(pokemon => pokemon.id === clavarPokemon.id)) {
+                pokemonesGuardados.push(clavarPokemon);
+                localStorage.setItem("pokemones", JSON.stringify(pokemonesGuardados));
+            }
+        }
+
+        function actualizarContador() {
+            let contadorElemento = document.getElementById("contador");
+            contadorElemento.textContent = contador;
+            localStorage.setItem("contador", contador);
+        }
+
+        function mostrarPokemonesOrdenados() {
+            let pokemonesGuardados = JSON.parse(localStorage.getItem("pokemones")) || [];
+            pokemonesGuardados.sort((a, b) => a.id - b.id);
+            pokedexContainer.innerHTML = "";
+            pokemonesGuardados.forEach(pokemon => {
+                tratarPokemon(pokemon);
+            });
+        }
+
+        function borrarTodo() {
+            localStorage.removeItem("pokemones");
+            localStorage.removeItem("contador");
+            pokedexContainer.innerHTML = "";
+            contador = 0;
+            actualizarContador();
+        }
+    </script>
+
+</body>
+</html>
