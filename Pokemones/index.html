@@ -21,6 +21,16 @@
             text-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         }
 
+        #search-container {
+            position: sticky;
+            top: 0;
+            background-color: #f7f7f7;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            text-align: center;
+        }
+
         #nombrePokemon {
             width: 300px;
             padding: 10px;
@@ -52,12 +62,7 @@
             font-size: 1.5em;
             font-weight: 600;
             color: #ff5c5c;
-            float: right;
-            margin-right: 20px;
-            background-color: #ffe5e5;
-            padding: 5px 15px;
-            border-radius: 25px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            margin-left: 10px; /* Espacio entre el botón y el contador */
         }
 
         #PokedexContainer {
@@ -97,17 +102,15 @@
         .pokemon:hover {
             transform: scale(1.05);
         }
-
     </style>
 </head>
 <body>
 
     <h1>Pokédex</h1>
-    <div style="text-align: center;">
+    <div id="search-container">
         <input id="nombrePokemon" placeholder="Busca tu pokémon" type="text">
         <button id="boton">Buscar</button>
-        <button id="borrarTodo">Borrar todo</button>
-        <span id="contador">0</span>
+        <span id="contador">0/1025</span>
     </div>
 
     <div id="PokedexContainer"></div>
@@ -115,41 +118,64 @@
     <script>
         let nombrePokemon = document.getElementById("nombrePokemon");
         let boton = document.getElementById("boton");
-        let borrarTodoBtn = document.getElementById("borrarTodo");
         let pokedexContainer = document.getElementById("PokedexContainer");
-        let contador = localStorage.getItem("contador") ? parseInt(localStorage.getItem("contador")) : 0;
+        let contadorElemento = document.getElementById("contador");
+
+        let pokemonesGuardados = []; // Array para almacenar los Pokémon introducidos
+        const MAX_POKEMONES = 1025; // Máximo de Pokémon
+        let contadorAcertados = 0; // Contador para Pokémon acertados
 
         boton.addEventListener("click", buscarPokemon);
-        borrarTodoBtn.addEventListener("click", borrarTodo);
         nombrePokemon.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 buscarPokemon();
             }
         });
 
-        window.onload = function() {
-            let pokemonesGuardados = JSON.parse(localStorage.getItem("pokemones")) || [];
-            pokemonesGuardados.sort((a, b) => a.id - b.id);
-            pokemonesGuardados.forEach(pokemon => {
-                tratarPokemon(pokemon);
-            });
-            actualizarContador();
-        };
-
         function buscarPokemon() {
-            fetch(`https://pokeapi.co/api/v2/pokemon/${nombrePokemon.value.toLowerCase()}`)
-            .then(response => response.json())
-            .then(clavarPokemon => {
-                guardarPokemon(clavarPokemon);
-                nombrePokemon.value = "";
-                contador++;
-                actualizarContador();
-                mostrarPokemonesOrdenados();
+            const pokemonNombre = nombrePokemon.value.toLowerCase();
+
+            // Comprobar si el Pokémon ya está guardado
+            if (pokemonesGuardados.some(pokemon => pokemon.name.toLowerCase() === pokemonNombre)) {
+                alert("Este Pokémon ya ha sido añadido.");
+                return;
+            }
+
+            fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonNombre}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Pokémon no encontrado");
+                }
+                return response.json();
             })
-            .catch(error => console.log(error));
+            .then(clavarPokemon => {
+                if (pokemonesGuardados.length < MAX_POKEMONES) { // Verificar que no se exceda el máximo
+                    pokemonesGuardados.push(clavarPokemon); // Guardar el Pokémon en el array
+                    contadorAcertados++; // Incrementar el contador solo si se añade un Pokémon válido
+                    mostrarPokemonesOrdenados(); // Mostrar Pokémon en orden
+                    nombrePokemon.value = ""; // Limpiar el campo de entrada
+                    actualizarContador(); // Actualizar el contador
+                } else {
+                    alert("Has alcanzado el límite de 1025 Pokémon.");
+                }
+            })
+            .catch(error => alert(error.message)); // Mostrar error si el Pokémon no se encuentra
         }
 
-        function tratarPokemon(clavarPokemon) {
+        function mostrarPokemonesOrdenados() {
+            // Limpiar el contenedor antes de agregar los Pokémon
+            pokedexContainer.innerHTML = "";
+
+            // Ordenar los Pokémon por su ID (número en la Pokédex)
+            pokemonesGuardados.sort((a, b) => a.id - b.id);
+
+            // Mostrar todos los Pokémon en el orden correcto
+            pokemonesGuardados.forEach(pokemon => {
+                mostrarPokemon(pokemon);
+            });
+        }
+
+        function mostrarPokemon(clavarPokemon) {
             let pokemonDiv = document.createElement("div");
             pokemonDiv.className = "pokemon";
             pokemonDiv.innerHTML = `
@@ -166,35 +192,8 @@
             return nombre.charAt(0).toUpperCase() + nombre.slice(1);
         }
 
-        function guardarPokemon(clavarPokemon) {
-            let pokemonesGuardados = JSON.parse(localStorage.getItem("pokemones")) || [];
-            if (!pokemonesGuardados.some(pokemon => pokemon.id === clavarPokemon.id)) {
-                pokemonesGuardados.push(clavarPokemon);
-                localStorage.setItem("pokemones", JSON.stringify(pokemonesGuardados));
-            }
-        }
-
         function actualizarContador() {
-            let contadorElemento = document.getElementById("contador");
-            contadorElemento.textContent = contador;
-            localStorage.setItem("contador", contador);
-        }
-
-        function mostrarPokemonesOrdenados() {
-            let pokemonesGuardados = JSON.parse(localStorage.getItem("pokemones")) || [];
-            pokemonesGuardados.sort((a, b) => a.id - b.id);
-            pokedexContainer.innerHTML = "";
-            pokemonesGuardados.forEach(pokemon => {
-                tratarPokemon(pokemon);
-            });
-        }
-
-        function borrarTodo() {
-            localStorage.removeItem("pokemones");
-            localStorage.removeItem("contador");
-            pokedexContainer.innerHTML = "";
-            contador = 0;
-            actualizarContador();
+            contadorElemento.textContent = `${contadorAcertados}/${MAX_POKEMONES}`; // Actualiza el contador con Pokémon acertados
         }
     </script>
 
