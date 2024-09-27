@@ -1,0 +1,43 @@
+
+    <style>
+    
+    a{
+  border: 1px black solid; 
+  padding-top: 10px; 
+  padding-bottom: 10px; 
+  padding-left: 15px; 
+  padding-right: 15px;
+  border-radius: 50px;
+  margin-top: 10px; 
+  margin-bottom: 10px; 
+  margin-left: 5px; 
+  margin-right: 5px;
+  background-color: rgb(226, 172, 204);
+}
+  a:hover , .activo{
+    background-color: rgb(243, 206, 206);
+  }
+
+  .sufrif{
+    background-color: tomato;
+  }
+  .sufrif:hover{
+
+    background-color: black;
+    
+  }
+
+    </style>
+
+    <nav style="text-align: center;">
+        <a routerLink="" routerLinkActive="activo" [routerLinkActiveOptions]="{exact : true}" >Inicio</a>        
+        <a routerLink="/QuienesSomos" routerLinkActive="activo" >Quienes Somos</a>        
+        <a routerLink="/Producto/ListaProductos" routerLinkActive="activo" >Producto</a>        
+        <a routerLink="/Contacto" routerLinkActive="activo" >Contacto</a>          
+             
+    </nav>
+    
+    
+<router-outlet></router-outlet>
+
+<footer style="padding: 15px;"><a routerLink="/Politica" routerLinkActive="activo" class="sufrif">Politica Privacidad</a>     </footer>

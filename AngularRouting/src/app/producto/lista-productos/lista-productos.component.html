@@ -1,0 +1,49 @@
+<style>
+    th {
+        border: 2px black solid;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .tabla {
+        display: flex;
+        justify-content: center;  /* Centra la tabla horizontalmente */
+        align-items: center;      /* Centra la tabla verticalmente */
+        margin-top: 20px;           /* Altura completa de la ventana para centrar verticalmente */
+    }
+    table {
+        border-collapse: collapse;
+        margin: auto;  /* Esta propiedad centra la tabla en su contenedor */
+    }
+
+    td{
+        border: 2px black solid;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .dineros{
+        text-align: center;
+    }
+
+</style>
+
+<div class="tabla">
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+        </tr>
+       
+        @for (producto of ArrayObjetos; track $index) {
+           
+            <tr>
+                <td>{{producto.ID}}</td>
+                <td>{{producto.Nombre}}</td>
+                <td class="dineros">{{producto.Precio}}</td>
+            </tr> 
+            
+
+        }
+        
+    </table>
+</div>
